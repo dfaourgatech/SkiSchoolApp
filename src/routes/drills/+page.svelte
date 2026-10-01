@@ -1,10 +1,11 @@
 <script>
-	import { drills, skills } from '$lib/data';
+	import { drills } from '$lib/data';
+	import { content } from '$lib/content.svelte';
 
 	let maxLevel = $state(4);
 	const filtered = $derived(drills.drills.filter((d) => d.levelMin <= maxLevel));
 	const fundamentalNames = $derived(
-		new Map(skills.skills.flatMap((s) => s.fundamentals).map((f) => [f.id, f.name]))
+		new Map(content.skillsView.skills.flatMap((s) => s.fundamentals).map((f) => [f.id, f.name]))
 	);
 </script>
 
