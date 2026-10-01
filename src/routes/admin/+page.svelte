@@ -222,52 +222,56 @@
 	the changes permanent and keep the versioned seed pipeline as the source of truth.
 </p>
 
-<h2>Skills</h2>
-<p class="muted">Names and summaries of the three PSIA skills — shown on the fundamentals page.</p>
-{#each skills.skills as s (s.id)}
-	{@const so = skillOverrides[s.id]}
-	<div class="card">
-		<h3>{s.id}</h3>
-		<label>
-			Name
-			<input
-				value={so?.name ?? s.name}
-				oninput={(e) => setSkillOverride(s.id, 'name', e.currentTarget.value)}
-			/>
-		</label>
-		<label>
-			Summary
-			<textarea
-				rows="3"
-				value={so?.summary ?? s.summary}
-				oninput={(e) => setSkillOverride(s.id, 'summary', e.currentTarget.value)}
-			></textarea>
-		</label>
-	</div>
-{/each}
+<details class="card section" open>
+	<summary><h2>Skills</h2></summary>
+	<p class="muted">Names and summaries of the three PSIA skills — shown on the fundamentals page.</p>
+	{#each skills.skills as s (s.id)}
+		{@const so = skillOverrides[s.id]}
+		<div class="card">
+			<h3>{s.id}</h3>
+			<label>
+				Name
+				<input
+					value={so?.name ?? s.name}
+					oninput={(e) => setSkillOverride(s.id, 'name', e.currentTarget.value)}
+				/>
+			</label>
+			<label>
+				Summary
+				<textarea
+					rows="3"
+					value={so?.summary ?? s.summary}
+					oninput={(e) => setSkillOverride(s.id, 'summary', e.currentTarget.value)}
+				></textarea>
+			</label>
+		</div>
+	{/each}
+</details>
 
-<h2>Fundamentals</h2>
-{#each fundamentals as f (f.id)}
-	<div class="card">
-		<h3>{f.id}</h3>
-		<label>
-			Label
-			<input
-				value={overrides[f.id]?.name ?? f.name}
-				oninput={(e) => setOverride(f.id, 'name', e.currentTarget.value)}
-			/>
-		</label>
-		<label>
-			Description
-			<textarea
-				rows="3"
-				value={overrides[f.id]?.description ?? f.description}
-				oninput={(e) => setOverride(f.id, 'description', e.currentTarget.value)}
-			></textarea>
-		</label>
-		<p class="muted">Seed: {f.name} — {f.description}</p>
-	</div>
-{/each}
+<details class="card section" open>
+	<summary><h2>Fundamentals</h2></summary>
+	{#each fundamentals as f (f.id)}
+		<div class="card">
+			<h3>{f.id}</h3>
+			<label>
+				Label
+				<input
+					value={overrides[f.id]?.name ?? f.name}
+					oninput={(e) => setOverride(f.id, 'name', e.currentTarget.value)}
+				/>
+			</label>
+			<label>
+				Description
+				<textarea
+					rows="3"
+					value={overrides[f.id]?.description ?? f.description}
+					oninput={(e) => setOverride(f.id, 'description', e.currentTarget.value)}
+				></textarea>
+			</label>
+			<p class="muted">Seed: {f.name} — {f.description}</p>
+		</div>
+	{/each}
+</details>
 
 <h2>Drills</h2>
 <p class="muted">
@@ -496,5 +500,9 @@
 	}
 	.error {
 		color: #b3261e;
+	}
+	details.section > summary h2 {
+		display: inline;
+		margin: 0;
 	}
 </style>
