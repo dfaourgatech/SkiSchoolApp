@@ -1,6 +1,8 @@
 <script>
 	import { base } from '$app/paths';
-	import { skills, drills, terrain } from '$lib/data';
+	import { drills, terrain } from '$lib/data';
+	import { content } from '$lib/content.svelte';
+	const skills = $derived(content.skillsView);
 </script>
 
 <h1>Ski School Coaching App</h1>
