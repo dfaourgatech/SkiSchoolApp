@@ -4,8 +4,9 @@
 
 	let maxLevel = $state(4);
 	let selectedFundamentals = $state<string[]>([]);
+	const drillData = $derived(content.drillsView);
 	const filtered = $derived(
-		drills.drills.filter(
+		drillData.drills.filter(
 			(d) =>
 				d.levelMin <= maxLevel &&
 				(selectedFundamentals.length === 0 ||
@@ -24,7 +25,7 @@
 </script>
 
 <h1>Drill library</h1>
-<p class="muted">{drills.drills.length} seed drills · {drills.source}</p>
+<p class="muted">{drillData.drills.length} seed drills · {drillData.source}</p>
 
 <label>
 	Show drills for levels up to:
@@ -54,7 +55,7 @@
 </fieldset>
 
 <p class="muted">
-	Showing {filtered.length} of {drills.drills.length} drills
+	Showing {filtered.length} of {drillData.drills.length} drills
 </p>
 
 {#each filtered as drill (drill.id)}
