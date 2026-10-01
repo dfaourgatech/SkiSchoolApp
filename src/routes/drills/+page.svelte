@@ -37,8 +37,14 @@
 	</select>
 </label>
 
-<fieldset>
-	<legend>Show drills for fundamentals:</legend>
+<details class="card filters">
+	<summary>
+		Filter by fundamental{selectedFundamentals.length > 0
+			? ` (${selectedFundamentals.length} selected)`
+			: ''}
+	</summary>
+	<fieldset>
+		<legend>Show drills for fundamentals:</legend>
 	{#each content.fundamentals as f (f.id)}
 		<label class="check">
 			<input
@@ -52,7 +58,8 @@
 	{#if selectedFundamentals.length > 0}
 		<button class="linklike" onclick={() => (selectedFundamentals = [])}>Clear</button>
 	{/if}
-</fieldset>
+	</fieldset>
+</details>
 
 <p class="muted">
 	Showing {filtered.length} of {drillData.drills.length} drills
