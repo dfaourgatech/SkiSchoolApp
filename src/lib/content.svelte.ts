@@ -7,15 +7,22 @@
 // commit, keeping the human-reviewed pipeline intact.
 
 import { browser } from '$app/environment';
-import { skills as seedSkills, drills as seedDrills } from './data';
-import type { Drill, Fundamental } from './types';
+import { skills as seedSkills, drills as seedDrills, terrainTypes as seedTerrainTypes } from './data';
+import type { Drill, Fundamental, TerrainType } from './types';
 
 const FUNDAMENTAL_STORAGE_KEY = 'skicoach-fundamental-overrides-v1';
+const SKILL_STORAGE_KEY = 'skicoach-skill-overrides-v1';
 const DRILL_STORAGE_KEY = 'skicoach-drill-overrides-v1';
+const TERRAIN_TYPES_STORAGE_KEY = 'skicoach-terraintypes-override-v1';
 
 export interface FundamentalOverride {
 	name?: string;
 	description?: string;
+}
+
+export interface SkillOverride {
+	name?: string;
+	summary?: string;
 }
 
 function loadFromKey<T>(key: string): Record<string, T> {
@@ -42,12 +49,49 @@ export const overrides = $state<Record<string, FundamentalOverride>>(
 	loadFromKey<FundamentalOverride>(FUNDAMENTAL_STORAGE_KEY)
 );
 
+export const skillOverrides = $state<Record<string, SkillOverride>>(
+	loadFromKey<SkillOverride>(SKILL_STORAGE_KEY)
+);
+
 export const drillOverrides = $state<Record<string, Partial<Drill>>>(
 	loadFromKey<Partial<Drill>>(DRILL_STORAGE_KEY)
 );
 
+// Full-list override for terrain types (simpler than per-id deltas, since the
+// admin supports add/delete/rename here). null = no override, use seed.
+function loadTerrainTypeOverride(): TerrainType[] | null {
+	if (!browser) return null;
+	try {
+		const raw = localStorage.getItem(TERRAIN_TYPES_STORAGE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? (parsed as TerrainType[]) : null;
+	} catch {
+		return null;
+	}
+}
+
+export const terrainTypeList = $state<{ types: TerrainType[] | null }>({
+	types: loadTerrainTypeOverride()
+});
+
+export function saveTerrainTypeList(): void {
+	if (!browser || !terrainTypeList.types) return;
+	saveToKey(TERRAIN_TYPES_STORAGE_KEY, terrainTypeList.types);
+}
+
+export function resetTerrainTypeList(): void {
+	if (!browser) return;
+	localStorage.removeItem(TERRAIN_TYPES_STORAGE_KEY);
+	terrainTypeList.types = null;
+}
+
 export function saveOverrides(): void {
 	saveToKey(FUNDAMENTAL_STORAGE_KEY, overrides);
+}
+
+export function saveSkillOverrides(): void {
+	saveToKey(SKILL_STORAGE_KEY, skillOverrides);
 }
 
 export function saveDrillOverrides(): void {
@@ -56,6 +100,10 @@ export function saveDrillOverrides(): void {
 
 export function resetOverrides(): void {
 	clearKey(FUNDAMENTAL_STORAGE_KEY, overrides);
+}
+
+export function resetSkillOverrides(): void {
+	clearKey(SKILL_STORAGE_KEY, skillOverrides);
 }
 
 export function resetDrillOverrides(): void {
@@ -103,10 +151,17 @@ class ContentStore {
 	get skillsView() {
 		return {
 			...seedSkills,
-			skills: seedSkills.skills.map((s) => ({
-				...s,
-				fundamentals: s.fundamentals.map(applyFundamentalOverride)
-			}))
+			skills: seedSkills.skills.map((s) => {
+				const so = skillOverrides[s.id];
+				const name = so?.name?.trim();
+				const summary = so?.summary?.trim();
+				return {
+					...s,
+					name: name ? name : s.name,
+					summary: summary ? summary : s.summary,
+					fundamentals: s.fundamentals.map(applyFundamentalOverride)
+				};
+			})
 		};
 	}
 
@@ -121,6 +176,10 @@ class ContentStore {
 		};
 	}
 
+	get terrainTypes(): TerrainType[] {
+		return terrainTypeList.types ?? seedTerrainTypes.types;
+	}
+
 	// Full updated seed files (overrides applied), ready to commit.
 	exportSkillsJson(): string {
 		return JSON.stringify(this.skillsView, null, 2);
@@ -128,6 +187,14 @@ class ContentStore {
 
 	exportDrillsJson(): string {
 		return JSON.stringify(this.drillsView, null, 2);
+	}
+
+	exportTerrainTypesJson(): string {
+		return JSON.stringify(
+			{ ...seedTerrainTypes, types: this.terrainTypes },
+			null,
+			2
+		);
 	}
 }
 
