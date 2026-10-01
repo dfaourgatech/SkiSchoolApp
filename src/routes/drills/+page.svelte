@@ -1,8 +1,11 @@
 <script>
-	import { drills } from '$lib/data';
+	import { drills, skills } from '$lib/data';
 
 	let maxLevel = $state(4);
 	const filtered = $derived(drills.drills.filter((d) => d.levelMin <= maxLevel));
+	const fundamentalNames = $derived(
+		new Map(skills.skills.flatMap((s) => s.fundamentals).map((f) => [f.id, f.name]))
+	);
 </script>
 
 <h1>Drill library</h1>
@@ -24,7 +27,7 @@
 			{drill.id} — {drill.name}
 			<span class="tag">L{drill.levelLabel}</span>
 			{#each drill.trains as t}
-				<span class="tag">{t}</span>
+				<span class="tag">{fundamentalNames.get(t) ?? t}</span>
 			{/each}
 		</summary>
 		<p><strong>Purpose:</strong> {drill.purpose}</p>
