@@ -33,7 +33,7 @@
 			{skills.levels.length} level bands (L1–L4) over {skills.skills.length} PSIA skills
 			({skills.skills
 				.flatMap((s) => s.fundamentals)
-				.map((f) => f.id)
+				.map((f) => f.name)
 				.join(', ')}).
 		</p>
 		<p class="muted">{skills.source}</p>
