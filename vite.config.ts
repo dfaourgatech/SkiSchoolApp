@@ -2,6 +2,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
+// Same base path as svelte.config.js so the installed PWA launches
+// under the GitHub Pages subpath instead of the domain root.
+const basePath = process.env.BASE_PATH ?? '';
+
 export default defineConfig({
 	plugins: [
 		sveltekit(),
@@ -14,7 +18,7 @@ export default defineConfig({
 				theme_color: '#0b3d66',
 				background_color: '#ffffff',
 				display: 'standalone',
-				start_url: '/'
+				start_url: `${basePath}/`
 				// TODO: add 192/512px PNG icons under static/ and list them here
 			},
 			workbox: {
