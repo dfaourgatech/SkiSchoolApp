@@ -4,13 +4,16 @@
 
 	let maxLevel = $state(4);
 	let selectedFundamentals = $state<string[]>([]);
+	let selectedTerrains = $state<string[]>([]);
 	const drillData = $derived(content.drillsView);
 	const filtered = $derived(
 		drillData.drills.filter(
 			(d) =>
 				d.levelMin <= maxLevel &&
 				(selectedFundamentals.length === 0 ||
-					d.trains.some((t) => selectedFundamentals.includes(t)))
+					d.trains.some((t) => selectedFundamentals.includes(t))) &&
+				(selectedTerrains.length === 0 ||
+					d.terrainTypes.some((t) => selectedTerrains.includes(t)))
 		)
 	);
 	const fundamentalNames = $derived(
@@ -21,6 +24,12 @@
 		selectedFundamentals = checked
 			? [...selectedFundamentals, id]
 			: selectedFundamentals.filter((x) => x !== id);
+	}
+
+	function toggleTerrain(id: string, checked: boolean) {
+		selectedTerrains = checked
+			? [...selectedTerrains, id]
+			: selectedTerrains.filter((x) => x !== id);
 	}
 </script>
 
@@ -57,6 +66,30 @@
 	{/each}
 	{#if selectedFundamentals.length > 0}
 		<button class="linklike" onclick={() => (selectedFundamentals = [])}>Clear</button>
+	{/if}
+	</fieldset>
+</details>
+
+<details class="card filters">
+	<summary>
+		Filter by terrain{selectedTerrains.length > 0
+			? ` (${selectedTerrains.length} selected)`
+			: ''}
+	</summary>
+	<fieldset>
+		<legend>Show drills for terrain types:</legend>
+	{#each content.terrainTypes as t (t.id)}
+		<label class="check">
+			<input
+				type="checkbox"
+				checked={selectedTerrains.includes(t.id)}
+				onchange={(e) => toggleTerrain(t.id, e.currentTarget.checked)}
+			/>
+			{t.name}
+		</label>
+	{/each}
+	{#if selectedTerrains.length > 0}
+		<button class="linklike" onclick={() => (selectedTerrains = [])}>Clear</button>
 	{/if}
 	</fieldset>
 </details>
