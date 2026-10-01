@@ -6,8 +6,9 @@
 import skills from './skills.json';
 import drills from './drills.json';
 import terrain from './terrain.json';
+import terrainTypes from './terrain-types.json';
 import cues from './cues.json';
 
-export { skills, drills, terrain, cues };
+export { skills, drills, terrain, terrainTypes, cues };
 
-export type { Drill, CauseEffect, Gate, GateKind, Skill, LevelBand } from '../types';
+export type { Drill, CauseEffect, Gate, GateKind, Skill, LevelBand, TerrainType } from '../types';
