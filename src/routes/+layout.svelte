@@ -9,6 +9,7 @@
 		<a class="brand" href="{base}/">⛷ SkiCoach</a>
 		<a href="{base}/drills">Drills</a>
 		<a href="{base}/terrain">Terrain</a>
+		<a href="{base}/admin">Admin</a>
 	</nav>
 </header>
 <main>
