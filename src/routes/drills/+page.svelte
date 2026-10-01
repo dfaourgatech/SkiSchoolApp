@@ -1,12 +1,26 @@
-<script>
+<script lang="ts">
 	import { drills } from '$lib/data';
 	import { content } from '$lib/content.svelte';
 
 	let maxLevel = $state(4);
-	const filtered = $derived(drills.drills.filter((d) => d.levelMin <= maxLevel));
-	const fundamentalNames = $derived(
-		new Map(content.skillsView.skills.flatMap((s) => s.fundamentals).map((f) => [f.id, f.name]))
+	let selectedFundamentals = $state<string[]>([]);
+	const filtered = $derived(
+		drills.drills.filter(
+			(d) =>
+				d.levelMin <= maxLevel &&
+				(selectedFundamentals.length === 0 ||
+					d.trains.some((t) => selectedFundamentals.includes(t)))
+		)
 	);
+	const fundamentalNames = $derived(
+		new Map(content.fundamentals.map((f) => [f.id, f.name]))
+	);
+
+	function toggleFundamental(id: string, checked: boolean) {
+		selectedFundamentals = checked
+			? [...selectedFundamentals, id]
+			: selectedFundamentals.filter((x) => x !== id);
+	}
 </script>
 
 <h1>Drill library</h1>
@@ -21,6 +35,27 @@
 		<option value={4}>L4</option>
 	</select>
 </label>
+
+<fieldset>
+	<legend>Show drills for fundamentals:</legend>
+	{#each content.fundamentals as f (f.id)}
+		<label class="check">
+			<input
+				type="checkbox"
+				checked={selectedFundamentals.includes(f.id)}
+				onchange={(e) => toggleFundamental(f.id, e.currentTarget.checked)}
+			/>
+			{f.name}
+		</label>
+	{/each}
+	{#if selectedFundamentals.length > 0}
+		<button class="linklike" onclick={() => (selectedFundamentals = [])}>Clear</button>
+	{/if}
+</fieldset>
+
+<p class="muted">
+	Showing {filtered.length} of {drills.drills.length} drills
+</p>
 
 {#each filtered as drill (drill.id)}
 	<details class="card">
