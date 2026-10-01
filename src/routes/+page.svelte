@@ -39,6 +39,7 @@
 				.join(', ')}).
 		</p>
 		<p class="muted">{skills.source}</p>
+		<a href="{base}/fundamentals">The five fundamentals →</a>
 	</div>
 </div>
 
