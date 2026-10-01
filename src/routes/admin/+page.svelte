@@ -11,12 +11,72 @@
 		pruneDrillOverrides,
 		content
 	} from '$lib/content.svelte';
+	import { ghToken, setGhToken, checkGhConnection, commitFile } from '$lib/github.svelte';
 	import type { Drill } from '$lib/types';
 
 	const fundamentals = skills.skills.flatMap((s) => s.fundamentals);
 	const seedDrillsById = new Map(drills.drills.map((d) => [d.id, d]));
 
 	let savedFlash = $state(false);
+
+	// ---- github publishing ----
+	let tokenInput = $state('');
+	let ghUser = $state('');
+	let ghBusy = $state(false);
+	let ghError = $state('');
+	let publishState = $state<'idle' | 'publishing' | 'done'>('idle');
+	const ghConnected = $derived(ghToken.value !== '');
+
+	async function onConnect() {
+		ghBusy = true;
+		ghError = '';
+		try {
+			setGhToken(tokenInput);
+			ghUser = await checkGhConnection();
+			tokenInput = '';
+		} catch (e) {
+			setGhToken('');
+			ghError = e instanceof Error ? e.message : String(e);
+		} finally {
+			ghBusy = false;
+		}
+	}
+
+	function onDisconnect() {
+		setGhToken('');
+		ghUser = '';
+		ghError = '';
+	}
+
+	async function onPublish() {
+		publishState = 'publishing';
+		ghError = '';
+		try {
+			onSave(); // persist local edits first
+			const hasFundamentalEdits = Object.keys(overrides).length > 0;
+			const hasDrillEdits = Object.keys(drillOverrides).length > 0;
+			if (hasFundamentalEdits) {
+				await commitFile(
+					'src/lib/data/skills.json',
+					content.exportSkillsJson(),
+					'Update skills seed from admin page'
+				);
+			}
+			if (hasDrillEdits) {
+				await commitFile(
+					'src/lib/data/drills.json',
+					content.exportDrillsJson(),
+					'Update drills seed from admin page'
+				);
+			}
+			publishState = 'done';
+			setTimeout(() => (publishState = 'idle'), 4000);
+		} catch (e) {
+			ghError = e instanceof Error ? e.message : String(e);
+			if (/401/.test(ghError)) onDisconnect();
+			publishState = 'idle';
+		}
+	}
 
 	// ---- fundamentals ----
 	function setOverride(id: string, field: 'name' | 'description', value: string) {
@@ -217,6 +277,49 @@
 	{#if savedFlash}<span class="muted">Saved ✓</span>{/if}
 </div>
 
+<h2>Publish to GitHub</h2>
+<p class="muted">
+	Commits the current seed content straight to the repo — the deploy workflow
+	rebuilds automatically. Needs a fine-grained personal access token: GitHub →
+	Settings → Developer settings → Fine-grained tokens → Generate new token, scoped
+	to repository <code>dfaourgatech/SkiSchoolApp</code> only, with
+	<strong>Contents: Read and write</strong>. The token stays in this browser's
+	localStorage and is only ever sent to api.github.com. Note: this writes the JSON
+	seeds directly — the <code>.md</code> source files won't reflect these edits.
+</p>
+{#if ghConnected}
+	<p>
+		Connected{#if ghUser} as <strong>{ghUser}</strong>{/if}
+		<button class="linklike" onclick={onDisconnect}>Disconnect</button>
+	</p>
+	<button
+		onclick={onPublish}
+		disabled={publishState === 'publishing' ||
+			(Object.keys(overrides).length === 0 && Object.keys(drillOverrides).length === 0)}
+	>
+		{publishState === 'publishing'
+			? 'Publishing…'
+			: publishState === 'done'
+				? 'Published ✓'
+				: 'Save & publish to repo'}
+	</button>
+	{#if ghError}<p class="error">{ghError}</p>{/if}
+{:else}
+	<label>
+		Personal access token
+		<input
+			type="password"
+			bind:value={tokenInput}
+			placeholder="github_pat_…"
+			autocomplete="off"
+		/>
+	</label>
+	<button onclick={onConnect} disabled={ghBusy || !tokenInput.trim()}>
+		{ghBusy ? 'Checking…' : 'Connect'}
+	</button>
+	{#if ghError}<p class="error">{ghError}</p>{/if}
+{/if}
+
 <p><a href="{base}/">← Back to app</a></p>
 
 <style>
@@ -238,5 +341,8 @@
 		margin-top: 0.25rem;
 		padding: 0.5rem;
 		font: inherit;
+	}
+	.error {
+		color: #b3261e;
 	}
 </style>
