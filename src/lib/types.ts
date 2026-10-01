@@ -29,6 +29,7 @@ export interface Drill {
 	levelMin: number;
 	levelMax: number;
 	terrain: string;
+	terrainTypes: string[]; // terrain type ids, e.g. ["T2", "T3"]
 	trains: string[]; // fundamental ids, e.g. ["F4", "F5"]
 	purpose: string;
 	howTo: string;
@@ -56,6 +57,12 @@ export interface Gate {
 	skills: string[]; // fundamental ids
 	kind: GateKind;
 	why: string;
+}
+
+export interface TerrainType {
+	id: string; // e.g. "T2"
+	name: string;
+	description: string;
 }
 
 export interface TerrainEntry {
