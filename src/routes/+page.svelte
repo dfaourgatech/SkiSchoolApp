@@ -1,4 +1,5 @@
 <script>
+	import { base } from '$app/paths';
 	import { skills, drills, terrain } from '$lib/data';
 </script>
 
@@ -15,7 +16,7 @@
 			{drills.drills.length} seed drills tagged to the PSIA skills taxonomy — each with
 			purpose, how-to, cues, watch-fors, and fallbacks.
 		</p>
-		<a href="/drills">Browse drills →</a>
+		<a href="{base}/drills">Browse drills →</a>
 	</div>
 	<div class="card">
 		<h2>🗺 Terrain &amp; gates</h2>
@@ -24,7 +25,7 @@
 			route-completion, safety, and awareness gates, plus {terrain.alerts.length} instructor
 			alerts.
 		</p>
-		<a href="/terrain">View terrain →</a>
+		<a href="{base}/terrain">View terrain →</a>
 	</div>
 	<div class="card">
 		<h2>🎯 Skills framework</h2>
